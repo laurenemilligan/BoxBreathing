@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct ManhuntWatchApp: App {
+struct BoxBreathingApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
