@@ -6,10 +6,11 @@ struct SessionView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 8) {
-                Text(session.phase.title.uppercased())
+                Text(title)
                     .font(.headline)
                     .foregroundStyle(tint)
-                ZStack {
+                if session.stage == .breathing {
+                    ZStack {
                     Circle()
                         .stroke(tint.opacity(0.2), lineWidth: 7)
                     Circle()
@@ -19,20 +20,41 @@ struct SessionView: View {
                     Text("\(session.phaseRemaining)")
                         .font(.system(size: 44, weight: .light, design: .rounded))
                         .monospacedDigit()
+                    }
+                    .frame(width: 96, height: 96)
+                    Text("\(session.remaining / 60):\(String(format: "%02d", session.remaining % 60)) left")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else if session.stage == .settlingBefore || session.stage == .settlingAfter {
+                    Text("\(session.stageRemaining)")
+                        .font(.system(size: 44, weight: .light, design: .rounded))
+                        .monospacedDigit()
+                    Text("Be still for a heart-rate reading")
+                        .font(.caption).foregroundStyle(.secondary)
+                } else {
+                    ProgressView("Saving workout")
                 }
-                .frame(width: 96, height: 96)
-                Text("\(session.remaining / 60):\(String(format: "%02d", session.remaining % 60)) left")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
                 HStack {
                     Button(session.isPaused ? "Resume" : "Pause") {
                         session.isPaused ? session.resume() : session.pause()
                     }
+                    .disabled(!session.isActive)
                     Button("End", role: .destructive) { session.end() }
+                        .disabled(!session.isActive)
                 }
                 .font(.caption)
             }
             .frame(maxWidth: .infinity)
+        }
+    }
+
+    private var title: String {
+        switch session.stage {
+        case .settlingBefore: "SETTLE IN"
+        case .settlingAfter: "REFLECT"
+        case .breathing: session.phase.title.uppercased()
+        case .finishing: "FINISHING"
+        default: "BOX BREATHING"
         }
     }
 

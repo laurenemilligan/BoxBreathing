@@ -14,6 +14,10 @@ enum BreathingPhase: Int, CaseIterable {
     }
 }
 
+enum SessionStage {
+    case ready, settlingBefore, breathing, settlingAfter, finishing, complete
+}
+
 @MainActor
 final class BreathingSession: ObservableObject {
     @Published private(set) var isActive = false
@@ -22,6 +26,10 @@ final class BreathingSession: ObservableObject {
     @Published private(set) var phaseRemaining = 4
     @Published private(set) var remaining = 0
     @Published private(set) var phaseProgress = 0.0
+    @Published private(set) var stage: SessionStage = .ready
+    @Published private(set) var comparison: HeartRateComparison?
+    @Published private(set) var errorMessage: String?
+    @Published private(set) var stageRemaining = 30
 
     private var durations = [4, 4, 4, 4]
     private var totalSeconds = 0.0
@@ -29,27 +37,47 @@ final class BreathingSession: ObservableObject {
     private var pausedElapsed = 0.0
     private var lastPhaseNumber = 0
     private var timer: Timer?
-    private let runtime = ExtendedSessionManager()
+    private var workout: HeartRateWorkout?
+    private var stageStartUptime = 0.0
+    private let settlingSeconds = 30.0
 
     func start(minutes: Int, durations: [Int]) {
-        guard !isActive, durations.count == 4 else { return }
+        guard stage == .ready, durations.count == 4 else { return }
+        errorMessage = nil
+        comparison = nil
         self.durations = durations.map { max(1, $0) }
         totalSeconds = Double(minutes * 60)
-        startUptime = ProcessInfo.processInfo.systemUptime
         pausedElapsed = 0
         lastPhaseNumber = 0
         phase = .inhale
-        isActive = true
-        isPaused = false
-        runtime.start { [weak self] in self?.end() }
-        HapticCue.play(for: .inhale)
-        tick()
-        scheduleTimer()
+        stage = .finishing
+        let workout = HeartRateWorkout()
+        self.workout = workout
+        workout.onUnexpectedEnd = { [weak self] in
+            guard let self, self.isActive, self.stage != .finishing else { return }
+            self.errorMessage = "The workout ended unexpectedly."
+            self.end()
+        }
+        workout.start { [weak self] error in
+            guard let self else { return }
+            if let error {
+                self.errorMessage = error.localizedDescription
+                self.stage = .ready
+                self.workout = nil
+                return
+            }
+            self.isActive = true
+            self.isPaused = false
+            self.stage = .settlingBefore
+            self.stageStartUptime = ProcessInfo.processInfo.systemUptime
+            self.stageRemaining = Int(self.settlingSeconds)
+            self.scheduleTimer()
+        }
     }
 
     func pause() {
         guard isActive, !isPaused else { return }
-        pausedElapsed = ProcessInfo.processInfo.systemUptime - startUptime
+        pausedElapsed = ProcessInfo.processInfo.systemUptime
         isPaused = true
         timer?.invalidate()
         timer = nil
@@ -57,9 +85,11 @@ final class BreathingSession: ObservableObject {
 
     func resume() {
         guard isActive, isPaused else { return }
-        startUptime = ProcessInfo.processInfo.systemUptime - pausedElapsed
+        let pauseLength = ProcessInfo.processInfo.systemUptime - pausedElapsed
+        startUptime += pauseLength
+        stageStartUptime += pauseLength
         isPaused = false
-        HapticCue.play(for: phase)
+        if stage == .breathing { HapticCue.play(for: phase) }
         tick()
         scheduleTimer()
     }
@@ -68,9 +98,22 @@ final class BreathingSession: ObservableObject {
         guard isActive else { return }
         timer?.invalidate()
         timer = nil
-        runtime.stop()
         isActive = false
         isPaused = false
+        stage = .finishing
+        workout?.onUnexpectedEnd = nil
+        workout?.finish { [weak self] result in
+            self?.comparison = result
+            self?.stage = .complete
+            self?.workout = nil
+        }
+    }
+
+    func reset() {
+        guard !isActive else { return }
+        stage = .ready
+        comparison = nil
+        errorMessage = nil
     }
 
     private func scheduleTimer() {
@@ -81,11 +124,30 @@ final class BreathingSession: ObservableObject {
 
     private func tick() {
         guard isActive, !isPaused else { return }
+        if stage == .settlingBefore || stage == .settlingAfter {
+            let elapsed = ProcessInfo.processInfo.systemUptime - stageStartUptime
+            stageRemaining = max(0, Int(ceil(settlingSeconds - elapsed)))
+            if elapsed >= settlingSeconds {
+                if stage == .settlingBefore {
+                    workout?.markBeforeEnd()
+                    stage = .breathing
+                    startUptime = ProcessInfo.processInfo.systemUptime
+                    HapticCue.play(for: .inhale)
+                } else {
+                    end()
+                    WKInterfaceDevice.current().play(.success)
+                }
+            }
+            return
+        }
+        guard stage == .breathing else { return }
         let elapsed = min(totalSeconds, ProcessInfo.processInfo.systemUptime - startUptime)
         remaining = max(0, Int(ceil(totalSeconds - elapsed)))
         if elapsed >= totalSeconds {
-            end()
-            WKInterfaceDevice.current().play(.success)
+            stage = .settlingAfter
+            stageStartUptime = ProcessInfo.processInfo.systemUptime
+            stageRemaining = Int(settlingSeconds)
+            workout?.markAfterStart()
             return
         }
 

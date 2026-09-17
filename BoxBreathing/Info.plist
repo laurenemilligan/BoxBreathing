@@ -20,13 +20,13 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Box Breathing reads heart rate during the quiet periods before and after your breathing workout.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Box Breathing saves your Mind &amp; Body workout to Health.</string>
 	<key>WKApplication</key>
 	<true/>
 	<key>WKWatchOnly</key>
 	<true/>
-	<key>WKBackgroundModes</key>
-	<array>
-		<string>mindfulness</string>
-	</array>
 </dict>
 </plist>

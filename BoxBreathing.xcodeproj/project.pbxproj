@@ -14,7 +14,7 @@
 		A0000000000000000000001C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000016 /* SettingsView.swift */; };
 		A0000000000000000000001D /* HapticLabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000017 /* HapticLabView.swift */; };
 		A0000000000000000000001E /* SessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000018 /* SessionView.swift */; };
-		A0000000000000000000001F /* ExtendedSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000019 /* ExtendedSessionManager.swift */; };
+		A00000000000000000000022 /* HeartRateWorkout.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000021 /* HeartRateWorkout.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,8 +26,9 @@
 		A00000000000000000000016 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A00000000000000000000017 /* HapticLabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticLabView.swift; sourceTree = "<group>"; };
 		A00000000000000000000018 /* SessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionView.swift; sourceTree = "<group>"; };
-		A00000000000000000000019 /* ExtendedSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtendedSessionManager.swift; sourceTree = "<group>"; };
 		A00000000000000000000020 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A00000000000000000000021 /* HeartRateWorkout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateWorkout.swift; sourceTree = "<group>"; };
+		A00000000000000000000023 /* BoxBreathing.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = BoxBreathing.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,7 +60,8 @@
 				A00000000000000000000016 /* SettingsView.swift */,
 				A00000000000000000000017 /* HapticLabView.swift */,
 				A00000000000000000000018 /* SessionView.swift */,
-				A00000000000000000000019 /* ExtendedSessionManager.swift */,
+				A00000000000000000000021 /* HeartRateWorkout.swift */,
+				A00000000000000000000023 /* BoxBreathing.entitlements */,
 				A00000000000000000000020 /* Info.plist */,
 			);
 			path = BoxBreathing;
@@ -104,6 +106,11 @@
 				TargetAttributes = {
 					A0000000000000000000000C = {
 						CreatedOnToolsVersion = 26.6;
+						SystemCapabilities = {
+							com.apple.HealthKit = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};
@@ -147,7 +154,7 @@
 				A0000000000000000000001C /* SettingsView.swift in Sources */,
 				A0000000000000000000001D /* HapticLabView.swift in Sources */,
 				A0000000000000000000001E /* SessionView.swift in Sources */,
-				A0000000000000000000001F /* ExtendedSessionManager.swift in Sources */,
+				A00000000000000000000022 /* HeartRateWorkout.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -159,6 +166,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_ENTITLEMENTS = BoxBreathing/BoxBreathing.entitlements;
 				DEVELOPMENT_TEAM = N6A4H6Y3M2;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BoxBreathing/Info.plist;
@@ -181,6 +189,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_ENTITLEMENTS = BoxBreathing/BoxBreathing.entitlements;
 				DEVELOPMENT_TEAM = N6A4H6Y3M2;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BoxBreathing/Info.plist;
