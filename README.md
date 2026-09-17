@@ -16,7 +16,7 @@ Open this folder as a local project in Codex. Describe a change in plain languag
 
 1. Open `BoxBreathing.xcodeproj` in Xcode.
 2. In **Xcode > Settings > Apple Accounts**, sign in with your personal Apple Account.
-3. Select the **BoxBreathing** target and open **Signing & Capabilities**. Keep **Automatically manage signing** enabled, choose your **Personal Team**, and replace `com.example.BoxBreathing` with a unique bundle identifier.
+3. Select the **BoxBreathing** target and open **Signing & Capabilities**. Keep **Automatically manage signing** enabled and choose your **Personal Team**. The bundle identifier has already been set for this project.
 4. Pair the Series 10 with your iPhone and connect the paired iPhone to this Mac if Xcode requests it. Trust the Mac and enable Developer Mode on the watch if prompted.
 5. Choose the watch as Xcode's run destination and press **Run**.
 
