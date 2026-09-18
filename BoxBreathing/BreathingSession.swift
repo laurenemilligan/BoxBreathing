@@ -36,6 +36,7 @@ final class BreathingSession: ObservableObject {
     private var startUptime = 0.0
     private var pausedElapsed = 0.0
     private var lastPhaseNumber = 0
+    private var lastFlowPulse = 0
     private var timer: Timer?
     private var workout: HeartRateWorkout?
     private var stageStartUptime = 0.0
@@ -49,6 +50,7 @@ final class BreathingSession: ObservableObject {
         totalSeconds = Double(minutes * 60)
         pausedElapsed = 0
         lastPhaseNumber = 0
+        lastFlowPulse = 0
         phase = .inhale
         stage = .finishing
         let workout = HeartRateWorkout()
@@ -133,9 +135,12 @@ final class BreathingSession: ObservableObject {
                     stage = .breathing
                     startUptime = ProcessInfo.processInfo.systemUptime
                     HapticCue.play(for: .inhale)
+                    lastFlowPulse = 0
                 } else {
                     end()
-                    WKInterfaceDevice.current().play(.success)
+                    if UserDefaults.standard.string(forKey: "hapticStyle") != "off" {
+                        WKInterfaceDevice.current().play(.success)
+                    }
                 }
             }
             return
@@ -161,11 +166,13 @@ final class BreathingSession: ObservableObject {
                 let phaseNumber = cycleNumber * 4 + candidate.rawValue
                 if phaseNumber != lastPhaseNumber {
                     lastPhaseNumber = phaseNumber
+                    lastFlowPulse = 0
                     HapticCue.play(for: candidate)
                 }
                 phase = candidate
                 phaseRemaining = Int(ceil(boundary + duration - cycleElapsed))
                 phaseProgress = (cycleElapsed - boundary) / duration
+                HapticCue.playFlowPulse(for: candidate, progress: phaseProgress, lastPulse: &lastFlowPulse)
                 break
             }
             boundary += duration
